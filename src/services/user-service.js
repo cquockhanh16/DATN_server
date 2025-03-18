@@ -18,6 +18,22 @@ class UserService {
         .catch((err) => rej(err));
     });
   };
+
+  static findUserById = (id) => {
+    return new Promise((res, rej) => {
+      if (id === undefined || id.trim() === "") {
+        rej("Field id is valid");
+      }
+      User.findById(id)
+        .then((data) => {
+          if (!data) {
+            rej("User not found");
+          }
+          res(data);
+        })
+        .catch((err) => rej(err));
+    });
+  };
 }
 
 module.exports = UserService;
