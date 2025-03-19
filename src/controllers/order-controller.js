@@ -33,6 +33,36 @@ class OrderController {
       next(error);
     }
   };
+
+  static getListOrder = async (req, res, next) => {
+    try {
+      const { query } = req;
+      const orders = await OrderService.getListOrder(query);
+      res.status(200).json({
+        sts: true,
+        data: orders,
+        err: null,
+        mes: "get all order successfully!",
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  static getDetailOrderById = async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const detail = await OrderService.getDetailOrderById(id);
+      res.status(200).json({
+        sts: true,
+        data: detail,
+        err: null,
+        mes: "get detail order success",
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 module.exports = OrderController;

@@ -1,6 +1,7 @@
 const Order = require("../models/order-model");
 const User = require("../models/user-model");
 const UserService = require("./user-service");
+const { DATA_PAGE, LIMIT_DATA_PAGE } = require("../configs/const-config");
 class OrderService {
   static createOrder = (body) => {
     return new Promise((res, rej) => {
@@ -48,15 +49,59 @@ class OrderService {
             path: "products.product_id",
             select: "product_name estimated_value",
           })
-          .populate("customer_id")
+          .select("-customer_id")
           .then((data) => {
             if (!data) {
               rej("Order is not found");
             }
-            res(data);
+            res({ orders: data, customer: user });
           })
           .catch((err) => rej(err));
       });
+    });
+  };
+
+  static getListOrder = (query) => {
+    return new Promise((res, rej) => {
+      const { page, limit } = query;
+      const pageOrder = page || DATA_PAGE;
+      const limitOrder = limit || LIMIT_DATA_PAGE;
+      Order.find()
+        .skip((pageOrder - 1) * limitOrder)
+        .limit(limitOrder)
+        .then((data) => {
+          Order.countDocuments()
+            .then((count) => {
+              res({
+                total_page: Math.ceil(count / limitOrder),
+                current_page: +pageOrder,
+                data,
+              });
+            })
+            .catch((err) => rej(err));
+        })
+        .catch((err) => rej(err));
+    });
+  };
+
+  static getDetailOrderById = (id) => {
+    return new Promise((res, rej) => {
+      Order.findById(id)
+        .populate({
+          path: "products.product_id",
+          select: "product_name estimated_value",
+        })
+        .populate({
+          path: "customer_id",
+          select: "name",
+        })
+        .then((data) => {
+          if (!data) {
+            rej("Order not found");
+          }
+          res(data);
+        })
+        .catch((err) => rej(err));
     });
   };
 }
