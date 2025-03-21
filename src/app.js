@@ -4,6 +4,7 @@ const cors = require("cors");
 const helmet = require("helmet");
 const compression = require("compression");
 const morgan = require("morgan");
+const path = require("path");
 const expressRateLimit = require("express-rate-limit");
 const app = express();
 const limiter = expressRateLimit({
@@ -19,7 +20,11 @@ const categoryRouter = require("./routers/category-router");
 const pawnProductRouter = require("./routers/pawn-product-router");
 const orderRouter = require("./routers/order-router");
 
+app.set("view engine", "ejs"); // Đặt view engine là EJS
+app.set("views", path.join(__dirname, "views")); // Thư mục chứa các file EJS
+
 // Middleware
+app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json()); // Phân tích JSON request body
 app.use(express.urlencoded({ extended: true })); // Phân tích URL-encoded request body
 app.use(cors({ credentials: true }));

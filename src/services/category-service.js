@@ -8,6 +8,7 @@ class CategoryService {
       }
       const newCategory = new Category();
       newCategory.category_name = category_name;
+      newCategory.created_at = new Date().getTime();
       newCategory
         .save()
         .then((saveCategory) => res(saveCategory))

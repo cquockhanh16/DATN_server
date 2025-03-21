@@ -36,6 +36,7 @@ class PawnProductService {
       product_status ? (newProduct.product_status = product_status) : "";
       user_id ? (newProduct.user_id = user_id) : "";
       category_id ? (newProduct.category_id = category_id) : "";
+      newProduct.created_at = new Date().getTime();
       newProduct
         .save()
         .then((data) => res(data))
@@ -75,23 +76,27 @@ class PawnProductService {
       const { page, limit } = query;
       const pageOrder = page || DATA_PAGE;
       const limitOrder = limit || LIMIT_DATA_PAGE;
-      pawnProuct
-        .find()
-        .skip((pageOrder - 1) * limitOrder)
-        .limit(limitOrder)
-        .then((data) => {
-          pawnProuct
-            .countDocuments()
-            .then((count) => {
-              res({
-                total_page: Math.ceil(count / limitOrder),
-                current_page: +pageOrder,
-                data,
-              });
+      pawnProuct.countDocuments().then((count) => {
+        if (count === 0) {
+          res({
+            total_page: 1,
+            current_page: 1,
+            data: [],
+          });
+        }
+        pawnProuct
+          .find()
+          .skip((pageOrder - 1) * limitOrder)
+          .limit(limitOrder)
+          .then((data) =>
+            res({
+              total_page: Math.ceil(count / limitOrder),
+              current_page: +pageOrder,
+              data,
             })
-            .catch((err) => rej(err));
-        })
-        .catch((err) => rej(err));
+          )
+          .catch((err) => rej(err));
+      });
     });
   };
 
@@ -151,7 +156,9 @@ class PawnProductService {
         ? (fieldUpdate.category_id = category_id)
         : "";
       pawnProuct
-        .findByIdAndUpdate(id, fieldUpdate)
+        .findByIdAndUpdate(id, fieldUpdate, {
+          returnDocument: "after",
+        })
         .then((data) => {
           if (!data) {
             rej("Pawn product not found");

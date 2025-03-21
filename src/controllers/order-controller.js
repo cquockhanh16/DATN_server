@@ -63,6 +63,41 @@ class OrderController {
       next(error);
     }
   };
+
+  static updateOrderField = async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const { body } = req;
+      const updatedOrder = await OrderService.updateOrderField(body, id);
+      res.status(200).json({
+        sts: true,
+        data: updatedOrder,
+        err: null,
+        msg: "Updated order success",
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  static getOrderFilePDF = async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const fileName = await OrderService.getOrderFilePDF(id);
+      const protocol = req.protocol;
+      const host = req.get("host");
+      const baseUrl = `${protocol}://${host}`;
+      const pdfUrl = `${baseUrl}/${fileName}`;
+      res.status(200).json({
+        sts: true,
+        err: null,
+        data: pdfUrl,
+        msg: "get file pdf success",
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 module.exports = OrderController;

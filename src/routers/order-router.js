@@ -11,4 +11,8 @@ router.get("/order/list", OrderController.getListOrder);
 
 router.get("/order/detail/:id", OrderController.getDetailOrderById);
 
+router.patch("/order/update/:id", OrderController.updateOrderField);
+
+router.get("/order/file-pdf/:id", OrderController.getOrderFilePDF);
+
 module.exports = router;
