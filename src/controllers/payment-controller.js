@@ -111,9 +111,21 @@ class PaymentController {
       console.log(req.body);
 
       // 1. Kiểm tra chữ ký (signature) để đảm bảo request hợp lệ từ Momo
-      const rawSignature = `accessKey=${
-        process.env.MOMO_ACCESSKEY
-      }&amount=${amount}&extraData=&message=${message}&orderId=${orderId}&orderInfo=${orderInfo}&orderType=${orderType}&partnerCode=${partnerCode}&payType=${payType}&requestId=${requestId}&responseTime=${new Date().getTime()}&resultCode=${resultCode}&transId=${transId}`;
+      const rawSignature =
+        `accessKey=${process.env.MOMO_ACCESSKEY}` +
+        `&amount=${amount}` +
+        `&extraData=` +
+        (req.body.extraData || "") + // Đảm bảo extraData có giá trị hoặc chuỗi rỗng
+        `&message=${message}` +
+        `&orderId=${orderId}` +
+        `&orderInfo=${orderInfo}` +
+        `&orderType=${orderType}` +
+        `&partnerCode=${partnerCode}` +
+        `&payType=${payType}` +
+        `&requestId=${requestId}` +
+        `&responseTime=${req.body.responseTime}` + // Dùng responseTime từ Momo, không tự tạo
+        `&resultCode=${resultCode}` +
+        `&transId=${transId}`;
 
       const expectedSignature = crypto
         .createHmac("sha256", process.env.MOMO_SERCETKEY)
@@ -139,8 +151,9 @@ class PaymentController {
         tran.productId = "productId";
         tran.amount = amount;
         tran.paymentMethod = orderType;
-        tran.transactionCode = payType;
-        tran.orderId = transId;
+        tran.transactionCode = transId;
+        tran.payType = payType;
+        tran.orderId = orderId;
         await tran.save();
         // 3. Trả response cho Momo (bắt buộc)
         return res.status(200).json({
