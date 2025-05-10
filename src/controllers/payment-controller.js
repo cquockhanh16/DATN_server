@@ -1,5 +1,6 @@
 const moment = require("moment");
 const Transaction = require("../models/transaction-model");
+const PawnProductService = require("../services/pawn-product-service");
 const crypto = require("crypto");
 const axios = require("axios");
 
@@ -156,13 +157,19 @@ class PaymentController {
         tran.customerId = orderId.split("-")[2];
         tran.productId = orderId.split("-")[1];
         tran.amount = amount;
-        tran.paymentMethod = orderType;
+        tran.paymentMethod = partnerCode;
         tran.transactionCode = transId;
         tran.payType = payType;
         tran.orderId = orderId;
         tran.status = "success";
-        await tran.save();
-        // 3. Trả response cho Momo (bắt buộc)
+        await tran.save().theun((result) => {
+          PawnProductService.updatePawnProduct(
+            { holding_months: [""] },
+            null,
+            tran.productId
+          );
+        });
+        // 3. Trả response cho Momo (bắt bộc)
         return res.status(200).json({
           RspCode: 0,
           Message: "Confirm Success",
