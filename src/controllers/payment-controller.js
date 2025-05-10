@@ -160,7 +160,7 @@ class PaymentController {
         tran.transactionCode = transId;
         tran.payType = payType;
         tran.orderId = orderId;
-        tran.status = success;
+        tran.status = "success";
         await tran.save();
         // 3. Trả response cho Momo (bắt buộc)
         return res.status(200).json({
