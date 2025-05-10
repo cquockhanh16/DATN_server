@@ -140,7 +140,7 @@ class PaymentController {
       }
 
       // 2. Xử lý theo resultCode
-      if (resultCode === "0") {
+      if (resultCode === 0) {
         // Thanh toán thành công
         // TODO: Cập nhật database, gửi email xác nhận,...
         console.log(
