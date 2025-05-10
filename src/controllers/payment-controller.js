@@ -16,7 +16,7 @@ class PaymentController {
         partnerCode + new Date().getTime() + "-" + orderIdd + "-" + cccd;
       var orderId = requestId;
       var orderInfo = "pay with MoMo";
-      var redirectUrl = "https://momo.vn/return";
+      var redirectUrl = "http://localhost:5173/san-pham-cam-do";
       var ipnUrl = "https://datn-server-c9cu.onrender.com/api/momo/ipn";
       var amount = +amountt;
       var requestType = "captureWallet";
@@ -86,7 +86,12 @@ class PaymentController {
 
       // console.log(res);
 
-      return res.status(200).json({ data: result.data });
+      return res.status(200).json({
+        sts: true,
+        data: result.data,
+        err: null,
+        mes: "get qr payment",
+      });
     } catch (error) {
       console.log(error);
       next(error);
