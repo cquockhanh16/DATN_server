@@ -2,16 +2,18 @@ const path = require("path");
 const ejs = require("ejs");
 const puppeteer = require("puppeteer");
 const fs = require("fs");
+const { getTime } = require("./time-function");
 
 async function generatePDF(orderData) {
   try {
-    console.log(orderData);
     // Load template EJS
     const templatePath = path.resolve(
       __dirname,
       "../views",
       "order-template.ejs"
     );
+
+    orderData.getTime = getTime;
     const htmlContent = await ejs.renderFile(templatePath, orderData);
 
     // Khởi tạo Puppeteer

@@ -5,21 +5,8 @@ const UserService = require("../services/user-service");
 class PawnProductController {
   static createPawnProduct = async (req, res, next) => {
     try {
-      const { body } = req;
-      console.log(body);
-      if (body["user_id"] && body["category_id"]) {
-        const [userExist, categortExist] = await Promise.all(
-          UserService.findUserById(body["user_id"]),
-          CategoryService.findCategoryById(body["category_id"])
-        );
-      } else if (body["user_id"]) {
-        const userExist = await UserService.findUserById(body["user_id"]);
-      } else if (body["category_id"]) {
-        const categortExist = await CategoryService.findCategoryById(
-          body["category_id"]
-        );
-      }
-      const newProduct = await PawnProductService.createPawnProduct(body);
+      const { body, file } = req;
+      const newProduct = await PawnProductService.createPawnProduct(body, file);
       res.status(201).json({
         sts: true,
         data: newProduct,
@@ -33,10 +20,13 @@ class PawnProductController {
 
   static getListPawnProductByCustomerField = async (req, res, next) => {
     try {
-      const { phone_number, identity_card } = req.query;
+      const { field, limit, page } = req.query;
+      const user = req.user;
       const list = await PawnProductService.getListPawnProductByCustomerField({
-        phone_number,
-        identity_card,
+        field,
+        user,
+        limit,
+        page,
       });
       res.status(200).json({
         sts: true,
@@ -81,10 +71,11 @@ class PawnProductController {
 
   static updatePawnProduct = async (req, res, next) => {
     try {
-      const { body } = req;
+      const { body, file } = req;
       const { id } = req.params;
       const updatedProduct = await PawnProductService.updatePawnProduct(
         body,
+        file,
         id
       );
       res.status(200).json({

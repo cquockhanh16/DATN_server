@@ -26,8 +26,23 @@ const pawnProuctSchema = new Schema({
   },
   product_status: {
     type: String,
-    enum: ["active", "expired", "liquidated"],
+    enum: ["active", "expired", "redeemed", "liquidated"],
     default: "active",
+  },
+  pawn_date: {
+    type: Number,
+    required: true,
+  },
+  interest_rate: {
+    type: Number,
+    default: 0.1,
+  },
+  term: {
+    type: Number,
+    required: true,
+  },
+  holding_months: {
+    type: [], // Mảng chứa các giá trị hỗn hợp (có thể là số, chuỗi, đối tượng, v.v.)
   },
   product_quantity: {
     type: Number,
@@ -49,4 +64,4 @@ const pawnProuctSchema = new Schema({
   },
 });
 
-module.exports = mongoose.model("pawnProuct", pawnProuctSchema);
+module.exports = mongoose.model("pawnProduct", pawnProuctSchema);

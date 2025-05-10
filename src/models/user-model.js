@@ -17,12 +17,11 @@ const userSchema = new Schema({
     required: true,
   },
   identity_card: {
-    type: Number,
+    type: String,
     required: true,
     unique: true,
   },
-  identity_card_image_front: String,
-  identity_card_image_back: String,
+  identity_card_image: String,
   created_at: {
     type: Number,
   },

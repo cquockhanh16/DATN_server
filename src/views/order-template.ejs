@@ -3,42 +3,46 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hóa Đơn Bán Hàng</title>
+    <title>Hợp Đồng Cầm Đồ</title>
     <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+      }
       body {
         font-family: Arial, sans-serif;
-        margin: 20px;
-        padding: 0;
       }
 
       .invoice-container {
         width: 800px;
         margin: auto;
-        border: 1px solid #000;
-        padding: 20px;
+        /* border: 1px solid #000; */
+        padding: 30px 50px;
       }
 
       .header {
-        text-align: center;
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
       }
 
-      .header h1 {
-        margin: 0;
-        font-size: 20px;
-        text-transform: uppercase;
-        font-weight: bold;
-      }
-
-      .header .info {
-        margin-top: 10px;
-        font-size: 14px;
-        text-align: left;
+      .header div {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        justify-content: center;
+        align-items: center;
       }
 
       .customer-info {
         margin-top: 20px;
-        font-size: 14px;
+        font-size: 16px;
         line-height: 1.6;
+      }
+
+      .customer-info div:first-child {
+        display: flex;
+        justify-content: space-between;
       }
 
       table {
@@ -57,12 +61,31 @@
       td {
         text-align: center;
         padding: 5px;
-        font-size: 14px;
+        font-size: 16px;
+      }
+
+      .agreement {
+        margin-top: 20px;
+        font-size: 16px;
+        line-height: 1.6;
       }
 
       .footer {
         margin-top: 20px;
-        font-size: 14px;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .footer p {
+        text-align: center;
+      }
+
+      .footer div {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        justify-content: center;
+        align-items: center;
       }
 
       .footer .signature {
@@ -90,26 +113,49 @@
           <h3>CỦA HÀNG CẦM ĐỒ</h3>
           <h2>QUỐC KHÁNH</h2>
           <h3>
-            <strong> ĐT: 0977062264 </strong>
+            <strong> ĐT: 0977.062.264 </strong>
           </h3>
           <h4>ĐC: 17 Phú Kiều, HN</h4>
         </div>
-        <div></div>
+        <div>
+          <h3>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</h3>
+          <h3>Độc lập - Tự do - Hạnh phúc</h3>
+          <p>
+            <strong> ----------oOo---------- </strong>
+          </p>
+          <p>Hà Nội, Ngày.....tháng.....năm 20.....</p>
+          <h1>HỢP ĐỒNG CẦM ĐỒ</h1>
+          <h2>(Kiêm phiếu chi tiết)</h2>
+        </div>
       </div>
 
       <div class="customer-info">
-        <% if (customer_id && customer_id.name && customer_id.name.trim() !==
-        '') { %>
-        <strong>Tên khách hàng: </strong><%= customer_id.name %> <% } else { %>
-        <p>Tên khách hàng không có sẵn.</p>
-        <% } %>
-        <strong>Địa chỉ:</strong>
-        Bắc giang
-        <strong>SĐT:</strong>
-
-        0987654321
+        <div>
+          <p>
+            Họ và tên: <% if (customer_id && customer_id.name &&
+            customer_id.name.trim() !== '') { %>
+            <strong><%= customer_id.name %></strong> <% } else { %> <% } %>
+          </p>
+          <p>Đại diện đến cầm đồ</p>
+        </div>
+        <p>
+          Địa chỉ: <% if (customer_id && customer_id.address &&
+          customer_id.address.trim() !== '') { %>
+          <strong><%= customer_id.address %></strong> <% } else { %> <% } %>
+        </p>
+        <p>
+          Số CCCD (hoặc giấy tờ tùy thân khác): <% if (customer_id &&
+          customer_id.identity_card) { %>
+          <strong><%= customer_id.identity_card %></strong> <% } else { %> <% }
+          %>
+        </p>
+        <p>
+          SĐT: <% if (customer_id && customer_id.phone_number) { %>
+          <strong><%= customer_id.phone_number %></strong> <% } else { %> <% }
+          %>
+        </p>
       </div>
-
+      <p>Tôi xin thỏa thuận tự nguyện đặt đồ vật và tài sản kê sau đây:</p>
       <table>
         <thead>
           <tr>
@@ -118,6 +164,8 @@
             <th>Tên sản phẩm</th>
             <th>Số lượng</th>
             <th>Giá cầm</th>
+            <th>Ngày cầm</th>
+            <th>Hạn chuộc</th>
             <th>Thành tiền</th>
           </tr>
         </thead>
@@ -133,6 +181,16 @@
               %>
             </td>
             <td>
+              <%= getTime(products[i].product_id.pawn_date) %>/<%=
+              getTime(products[i].product_id.pawn_date, 'month') %>/<%=
+              getTime(products[i].product_id.pawn_date, 'year') %>
+            </td>
+            <td>
+              <%= getTime(products[i].product_id.term) %>/<%=
+              getTime(products[i].product_id.term, 'month') %>/<%=
+              getTime(products[i].product_id.term, 'year') %>
+            </td>
+            <td>
               <%= (products[i].product_id.product_quantity *
               products[i].product_id.estimated_value).toLocaleString('vi-VN') %>
             </td>
@@ -140,7 +198,7 @@
           <% total += products[i].product_id.estimated_value *
           products[i].product_id.product_quantity; %> <% } %>
         </tbody>
-        <tfoot>
+        <!-- <tfoot>
           <tr>
             <td colspan="4">Giảm giá</td>
             <td>10</td>
@@ -149,10 +207,55 @@
             <td colspan="4">Cộng</td>
             <td><%= total.toLocaleString('vi-VN') %></td>
           </tr>
-        </tfoot>
+        </tfoot> -->
       </table>
-
-      <div class="footer"></div>
+      <div class="agreement">
+        <p>Lãi suất: <strong> <%= interest_rate %>% / tháng </strong></p>
+        <p>
+          Lệ phí thỏa thuận:
+          <strong>
+            <%= (total * interest_rate / 100).toLocaleString('vi-VN') %> đ /
+            tháng
+          </strong>
+        </p>
+        <p>Tôi đã nhận đủ số tiền mà cửa hàng đã giao</p>
+        <p>Số tiền biết bằng chữ:</p>
+        <p>
+          Số tiền viết bằng số:
+          <strong><%= total.toLocaleString('vi-VN') %> đ</strong>
+        </p>
+        <ul></ul>
+        <p>
+          Hiệu cầm đồ được quyền quản lý, điều động khi cần thiết, khi hết hạn
+          mà không có tiền chuộc lại, tôi đồng ý bán đồ vật cầm, ngang bằng số
+          tiền tôi nhận từ cửa hàng.
+        </p>
+        <ul>
+          <li>Cửa hàng có quyền bán(thu vốn)</li>
+          <li>Lời thì cửa hàng hưởng</li>
+          <li>Lỗ thì cửa hàng phải chịu</li>
+        </ul>
+        <p>Tôi không hề thắc mắc, khiếu kiện nhờ cậy ai.</p>
+        <p>
+          Số tài sản tôi mang cầm chính là tài sản của tôi. Quyền định đoạt cao
+          nhất là tôi, số tài sản này không tranh chấp hoặc cầm cố bất kỳ cá
+          nhân, tổ chức hoặc Ngân hàng nào.
+        </p>
+        <p>
+          Nếu có điều gì man trá, sai trái tôi xin chịu trách nhiệm trước Pháp
+          luật Nhà nước.
+        </p>
+      </div>
+      <div class="footer">
+        <p style="text-align: center">
+          <strong style="text-align: center">Phụ trách cửa hàng</strong>
+        </p>
+        <div>
+          <p style="text-align: center">Ngày.....tháng.....năm 20.....</p>
+          <p style="text-align: center"><strong>Người nhận tiền</strong></p>
+          <span style="text-align: center">(Ký, ghi rõ họ tên)</span>
+        </div>
+      </div>
     </div>
   </body>
 </html>

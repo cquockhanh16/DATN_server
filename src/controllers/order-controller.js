@@ -18,10 +18,12 @@ class OrderController {
 
   static getListOrderByCustomerField = async (req, res, next) => {
     try {
-      const { phone_number, identity_card } = req.query;
+      const { phone_number, identity_card, limit, page } = req.query;
       const listOrder = await OrderService.getListOrderByCustomerField({
         phone_number,
         identity_card,
+        limit,
+        page,
       });
       res.status(200).json({
         sts: true,

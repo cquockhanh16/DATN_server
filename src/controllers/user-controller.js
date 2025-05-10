@@ -4,7 +4,8 @@ class UserController {
   static register = async (req, res, next) => {
     try {
       const body = req.body;
-      const user = await UserService.createUser(body);
+      const file = req.file;
+      const user = await UserService.createUser(body, file);
       res.status(201).json({
         sts: true,
         data: user,
@@ -48,9 +49,9 @@ class UserController {
 
   static updateUserField = async (req, res, next) => {
     try {
-      const { body } = req;
+      const { body, file } = req;
       const { id } = req.params;
-      const updatedUser = await UserService.updateUserField(body, id);
+      const updatedUser = await UserService.updateUserField(body, id, file);
       res.status(200).json({
         sts: true,
         err: null,

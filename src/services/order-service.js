@@ -14,14 +14,14 @@ class OrderService {
       }
       UserService.findUserByField({ field: customer_id })
         .then((data) => {
-          if (!data || data.length < 1) {
+          if (!data) {
             rej("Customer not found");
           }
           const newOrder = new Order();
           newOrder.products = products;
           interest_rate ? (newOrder.interest_rate = interest_rate) : "";
           term ? (newOrder.term = term) : "";
-          newOrder.customer_id = customer_id;
+          newOrder.customer_id = data._id;
           staff_id ? (newOrder.staff_id = staff_id) : "";
           newOrder.created_at = new Date().getTime();
           newOrder
@@ -35,33 +35,65 @@ class OrderService {
 
   static getListOrderByCustomerField = (query) => {
     return new Promise((res, rej) => {
-      //   if (id === undefined || id.trim() === "") {
-      //     rej("Customer id is empty!");
-      //   }
+      const { page, limit } = query;
+      const pageOrder = page || DATA_PAGE;
+      const limitOrder = limit || LIMIT_DATA_PAGE;
       const option = {};
-      if (query.phone_number) option.phone_number = query.phone_number;
+      // if (query.phone_number) option.phone_number = query.phone_number;
       if (query.identity_card) option.identity_card = query.identity_card;
       if (Object.keys(option).length === 0) {
         rej("Field is empty");
       }
-      User.findOne(option).then((user) => {
-        if (!user) {
-          rej("Customer is not found");
-        }
-        Order.find({ customer_id: user._id })
-          .populate({
-            path: "products.product_id",
-            select: "product_name estimated_value",
-          })
-          .select("-customer_id")
-          .then((data) => {
-            if (!data) {
-              rej("Order is not found");
+      // let user = {};
+      User.findOne(option)
+        .then((user) => {
+          Order.countDocuments().then((count) => {
+            if (count === 0) {
+              res({
+                total_page: 1,
+                current_page: 1,
+                data: [],
+              });
             }
-            res({ orders: data, customer: user });
-          })
-          .catch((err) => rej(err));
-      });
+            Order.find({ customer_id: user?._id })
+              .skip((pageOrder - 1) * limitOrder)
+              .limit(limitOrder)
+              .sort({ created_at: -1 })
+              .populate(
+                "products.product_id",
+                "product_quantity estimated_value"
+              )
+              .then((data) => {
+                const resData = { orders: data, customer: user };
+                res({
+                  total_page: Math.ceil(count / limitOrder),
+                  current_page: +pageOrder,
+                  data: resData,
+                  data_length: count,
+                  limit: limitOrder,
+                });
+              })
+              .catch((err) => rej(err));
+            // User.findOne(option).then((user) => {
+            //   if (!user) {
+            //     rej("Customer is not found");
+            //   }
+            //   Order.find({ customer_id: user._id })
+            //     .populate({
+            //       path: "products.product_id",
+            //       select: "product_name estimated_value",
+            //     })
+            //     .select("-customer_id")
+            //     .then((data) => {
+            //       if (!data) {
+            //         rej("Order is not found");
+            //       }
+            //       res({ orders: data, customer: user });
+            //     })
+            //     .catch((err) => rej(err));
+          });
+        })
+        .catch((err) => rej(err));
     });
   };
 
@@ -81,11 +113,16 @@ class OrderService {
         Order.find()
           .skip((pageOrder - 1) * limitOrder)
           .limit(limitOrder)
+          .sort({ created_at: -1 })
+          .populate("customer_id")
+          .populate("products.product_id", "product_quantity estimated_value")
           .then((data) =>
             res({
               total_page: Math.ceil(count / limitOrder),
               current_page: +pageOrder,
               data,
+              data_length: count,
+              limit: limitOrder,
             })
           )
           .catch((err) => rej(err));
@@ -98,11 +135,12 @@ class OrderService {
       Order.findById(id)
         .populate({
           path: "products.product_id",
-          select: "product_name estimated_value product_quantity",
+          select:
+            "product_name estimated_value product_quantity pawn_date term",
         })
         .populate({
           path: "customer_id",
-          select: "name",
+          select: "name phone_number address identity_card",
         })
         .then((data) => {
           if (!data) {
@@ -121,15 +159,21 @@ class OrderService {
           if (!data) {
             rej("Order not found");
           }
-          const { interest_rate, term, customer_id, staff_id } = body;
+          const { interest_rate, customer_id, staff_id } = body;
           interest_rate ? (data.interest_rate = interest_rate) : "";
-          term ? (data.term += term) : "";
-          data.customer_id ? (data.customer_id = customer_id) : "";
-          staff_id ? (data.staff_id = staff_id) : "";
-          data.updated_at = new Date().getTime();
-          data
-            .save()
-            .then((result) => res(result))
+          UserService.findUserByField({ field: customer_id })
+            .then((user) => {
+              if (!user) {
+                rej("Identify card is wrong");
+              }
+              data.customer_id = user._id;
+              staff_id ? (data.staff_id = staff_id) : "";
+              data.updated_at = new Date().getTime();
+              data
+                .save()
+                .then((result) => res(result))
+                .catch((err) => rej(err));
+            })
             .catch((err) => rej(err));
         })
         .catch((err) => rej(err));
@@ -143,12 +187,6 @@ class OrderService {
           if (!result) {
             rej("Generate PDF file error");
           }
-          // fs.unlink(result.destinationPath, (err) => {
-          //   if (err) {
-          //     rej(err);
-          //   }
-          // });
-
           res(result.fileName);
         });
       });

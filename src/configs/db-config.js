@@ -6,6 +6,8 @@ const mongoose = require("mongoose");
 // });
 require("dotenv").config();
 
+console.log(process.env.MONGO_URI)
+
 const connectDB = async () => {
   try {
     // Kết nối đến MongoDB sử dụng URI từ biến môi trường

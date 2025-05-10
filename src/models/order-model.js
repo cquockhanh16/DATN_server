@@ -6,17 +6,10 @@ const orderSchema = new Schema({
     {
       product_id: {
         type: Schema.Types.ObjectId,
-        ref: "pawnProuct",
+        ref: "pawnProduct",
       },
     },
   ],
-  interest_rate: {
-    type: Number,
-    default: 0.1,
-  },
-  term: {
-    type: Number,
-  },
   customer_id: {
     type: Schema.Types.ObjectId,
     ref: "User",

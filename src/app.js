@@ -19,14 +19,19 @@ const userRouter = require("./routers/user-router");
 const categoryRouter = require("./routers/category-router");
 const pawnProductRouter = require("./routers/pawn-product-router");
 const orderRouter = require("./routers/order-router");
+const authRouter = require("./routers/auth-router");
+const accountRouter = require("./routers/account-router");
+const paymentRouter = require("./routers/payment-router");
+
+const { deleteFileImageCloudinary } = require("./utils/delete-image");
 
 app.set("view engine", "ejs"); // Đặt view engine là EJS
 app.set("views", path.join(__dirname, "views")); // Thư mục chứa các file EJS
 
 // Middleware
 app.use(express.static(path.join(__dirname, "public")));
-app.use(express.json()); // Phân tích JSON request body
-app.use(express.urlencoded({ extended: true })); // Phân tích URL-encoded request body
+app.use(express.json({ limit: "5mb" }));
+app.use(express.urlencoded({ extended: true, limit: "5mb" }));
 app.use(cors({ credentials: true }));
 app.use(helmet());
 app.use(compression());
@@ -38,6 +43,9 @@ app.use("/api", userRouter);
 app.use("/api", categoryRouter);
 app.use("/api", pawnProductRouter);
 app.use("/api", orderRouter);
+app.use("/api", authRouter);
+app.use("/api", accountRouter);
+app.use("/api", paymentRouter);
 
 // connect database
 connectDB();
@@ -50,7 +58,11 @@ app.use((req, res) => {
 });
 
 // router handle error
-app.use((error, req, res, next) => {
+app.use(async (error, req, res, next) => {
+  if (req.file && req.file.path) {
+    await deleteFileImageCloudinary(req.file.path);
+  }
+
   res.status(error.status || 500).json({
     sts: false,
     err: error.message ? error.message : error ? error : "Error from server",
