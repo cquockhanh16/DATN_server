@@ -22,7 +22,7 @@ class PaymentController {
       var orderId = requestId;
       var orderInfo = "pay with MoMo";
       var redirectUrl = "https://momo.vn/return";
-      var ipnUrl = "http://localhost:2000/api/v1/callback";
+      var ipnUrl = "https://datn-server-c9cu.onrender.com/api/momo/ipn";
       var amount = +amountt;
       var requestType = "captureWallet";
       var extraData = ""; //pass empty value if your merchant does not have stores
