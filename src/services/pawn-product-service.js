@@ -269,8 +269,10 @@ class PawnProductService {
               holding_months.length > 1
                 ? holding_months.split(",")
                 : [holding_months];
+            let count = months.length || 0;
             data.holding_months = data.holding_months.map((item, index) => {
-              if (months.includes((index + 1).toString())) {
+              if (item === "" && count > 0) {
+                count--;
                 return new Date().getTime();
               }
               return item;
