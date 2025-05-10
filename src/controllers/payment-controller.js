@@ -1,5 +1,5 @@
 const moment = require("moment");
-const Transaction = require("../models/transaction-model");
+
 const PawnProductService = require("../services/pawn-product-service");
 const crypto = require("crypto");
 const axios = require("axios");
@@ -190,6 +190,20 @@ class PaymentController {
         RspCode: 99,
         Message: "Internal Server Error",
       });
+    }
+  };
+
+  static getListTransaction = async (req, res, next) => {
+    try {
+      const list = await Transaction.getListTransaction(req.query);
+      res.status(200).json({
+        sts: true,
+        data: list,
+        err: null,
+        mes: "get list successfully!",
+      });
+    } catch (error) {
+      next(error);
     }
   };
 }

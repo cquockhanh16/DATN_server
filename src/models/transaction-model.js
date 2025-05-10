@@ -15,7 +15,7 @@ const transactionSchema = new mongoose.Schema({
   paymentMethod: { type: String }, // Phương thức thanh toán (Momo, VNPay...)
   transactionCode: { type: String }, // Mã giao dịch từ cổng thanh toán
   payType: { type: String },
-  orderId: { type: String, unique: true }, // Mã đơn hàng của bạn
+  orderId: { type: String }, // Mã đơn hàng của bạn
 });
 
 module.exports = mongoose.model("Transaction", transactionSchema);

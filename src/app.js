@@ -22,6 +22,7 @@ const orderRouter = require("./routers/order-router");
 const authRouter = require("./routers/auth-router");
 const accountRouter = require("./routers/account-router");
 const paymentRouter = require("./routers/payment-router");
+const transactionRouter = require("./routers/transaction-router");
 
 const { deleteFileImageCloudinary } = require("./utils/delete-image");
 
@@ -46,6 +47,7 @@ app.use("/api", orderRouter);
 app.use("/api", authRouter);
 app.use("/api", accountRouter);
 app.use("/api", paymentRouter);
+app.use("/api", transactionRouter);
 
 // connect database
 connectDB();
