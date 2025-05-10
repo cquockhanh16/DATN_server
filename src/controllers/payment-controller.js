@@ -8,11 +8,12 @@ require("dotenv").config();
 class PaymentController {
   static CreatePaymentUrl = async (req, res, next) => {
     try {
-      let { orderIdd, amountt } = req.body;
+      let { orderIdd, amountt, cccd } = req.body;
       var partnerCode = "MOMO";
       var accessKey = process.env.MOMO_ACCESSKEY;
       var secretkey = process.env.MOMO_SERCETKEY;
-      var requestId = partnerCode + new Date().getTime() + "-" + orderIdd;
+      var requestId =
+        partnerCode + new Date().getTime() + "-" + orderIdd + "-" + cccd;
       var orderId = requestId;
       var orderInfo = "pay with MoMo";
       var redirectUrl = "https://momo.vn/return";
@@ -147,13 +148,14 @@ class PaymentController {
           `Payment successful for order ${orderId}, amount ${amount}`
         );
         const tran = new Transaction();
-        tran.customerId = "sdasadas";
-        tran.productId = "productId";
+        tran.customerId = orderId.split("-")[2];
+        tran.productId = orderId.split("-")[1];
         tran.amount = amount;
         tran.paymentMethod = orderType;
         tran.transactionCode = transId;
         tran.payType = payType;
         tran.orderId = orderId;
+        tran.status = success;
         await tran.save();
         // 3. Trả response cho Momo (bắt buộc)
         return res.status(200).json({
