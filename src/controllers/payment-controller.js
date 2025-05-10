@@ -1,11 +1,5 @@
 const moment = require("moment");
-const {
-  ProductCode,
-  VNPay,
-  VnpLocale,
-  ignoreLogger,
-  dateFormat,
-} = require("vnpay");
+const Transaction = require("../models/transaction-model");
 const crypto = require("crypto");
 const axios = require("axios");
 
@@ -114,6 +108,7 @@ class PaymentController {
         signature,
         // ... các tham số khác từ Momo
       } = req.body;
+      console.log(req.body);
 
       // 1. Kiểm tra chữ ký (signature) để đảm bảo request hợp lệ từ Momo
       const rawSignature = `accessKey=${
@@ -139,7 +134,14 @@ class PaymentController {
         console.log(
           `Payment successful for order ${orderId}, amount ${amount}`
         );
-
+        const tran = new Transaction();
+        tran.customerId = "sdasadas";
+        tran.productId = "productId";
+        tran.amount = amount;
+        tran.paymentMethod = orderType;
+        tran.transactionCode = payType;
+        tran.orderId = transId;
+        await tran.save();
         // 3. Trả response cho Momo (bắt buộc)
         return res.status(200).json({
           RspCode: 0,
