@@ -1,4 +1,5 @@
 const Transaction = require("../models/transaction-model");
+const User = require("../models/user-model");
 const { DATA_PAGE, LIMIT_DATA_PAGE } = require("../configs/const-config");
 
 class TransactionService {
@@ -7,8 +8,8 @@ class TransactionService {
       const { page, limit, customerId } = query;
       let option = {};
       customerId ? (option.customerId = customerId) : "";
-      const pageOrder = page || DATA_PAGE;
-      const limitOrder = limit || LIMIT_DATA_PAGE;
+      const pageOrder = +page || DATA_PAGE;
+      const limitOrder = +limit || LIMIT_DATA_PAGE;
       Transaction.countDocuments(option).then((count) => {
         if (count === 0) {
           res({
@@ -20,8 +21,8 @@ class TransactionService {
           });
         }
         Transaction.find(option)
-          .skip((pageOrder - 1) * limitOrder)
-          .limit(limitOrder)
+          .skip((+pageOrder - 1) * +limitOrder)
+          .limit(+limitOrder)
           .then((data) => {
             if (!data) {
               rej("Transaction is not found");

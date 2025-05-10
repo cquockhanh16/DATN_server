@@ -4,6 +4,7 @@ require("dotenv").config();
 class TransactionController {
   static getListTransaction = async (req, res, next) => {
     try {
+      console.log(req.query);
       const list = await TransactionService.getListTransaction(req.query);
       res.status(200).json({
         sts: true,

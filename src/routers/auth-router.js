@@ -4,6 +4,10 @@ const AuthController = require("../controllers/auth-controller");
 
 router.post("/auth/login", AuthController.login);
 
+router.post("/auth/logout", AuthController.logout);
+
+router.patch("/auth/change-password", AuthController.changePassword);
+
 // router.get("/user/list", UserController.getListUser);
 
 // router.get("/user", UserController.findUserByField);

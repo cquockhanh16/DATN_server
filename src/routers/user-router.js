@@ -9,7 +9,7 @@ router.post("/register", upload.single("image"), UserController.register);
 
 router.get("/user/list", UserController.getListUser);
 
-router.get("/user", UserController.findUserByField);
+router.get("/user/detail", UserController.findUserByField);
 
 router.patch(
   "/user/update/:id",

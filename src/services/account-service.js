@@ -30,6 +30,32 @@ class AccountService {
     });
   };
 
+  static changePassword = (body) => {
+    return new Promise((res, rej) => {
+      const { username, password, newPassword } = body;
+      console.log(body);
+      if (!username || !password || !newPassword) {
+        return rej("Field not empty");
+      }
+      Account.findOne({ username }).then((data) => {
+        console.log(username);
+        bcrypt.compare(password, data.password).then((isMatch) => {
+          if (!isMatch) {
+            return rej("Password not match");
+          }
+          bcrypt
+            .hash(newPassword, SALT_ROUNDS)
+            .then((hashed) => {
+              data.password = hashed;
+              data.updated_at = new Date().getTime();
+              return data.save();
+            })
+            .then((result) => res(result));
+        });
+      });
+    });
+  };
+
   static login = (body) => {
     return new Promise((res, rej) => {
       const { username, password } = body;
@@ -68,9 +94,13 @@ class AccountService {
                   algorithm: "HS256",
                 }
               );
+              delete accSave._doc.password;
               res({
-                data: {
+                account: {
                   ...accSave._doc,
+                },
+                user: {
+                  customer_id: data[1]._id,
                   name: data[1].name,
                   phone_number: data[1].phone_number,
                   address: data[1].address,
@@ -133,6 +163,34 @@ class AccountService {
             limit: limitOrder,
           });
         })
+        .catch((err) => rej(err));
+    });
+  };
+
+  static getDetailAccount = (username) => {
+    return new Promise((res, rej) => {
+      Account.findOne({ username })
+        .select("-password")
+        .then((data) => {
+          if (!data) {
+            return rej("Account not found");
+          }
+          res(data);
+        })
+        .catch((err) => rej(err));
+    });
+  };
+  static logout = (username) => {
+    return new Promise((res, rej) => {
+      Account.findOne({ username })
+        .then((data) => {
+          if (!data) {
+            return rej("Account not found");
+          }
+          data.status = "off";
+          return data.save();
+        })
+        .then((result) => res(result))
         .catch((err) => rej(err));
     });
   };

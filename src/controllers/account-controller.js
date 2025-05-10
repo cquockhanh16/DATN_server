@@ -30,6 +30,21 @@ class AccountController {
       next(error);
     }
   };
+
+  static getDetailAccount = async (req, res, next) => {
+    try {
+      const { username } = req.query;
+      const listAccount = await AccountService.getDetailAccount(username);
+      res.status(200).json({
+        sts: true,
+        err: null,
+        data: listAccount,
+        msg: "Get detail account success",
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 module.exports = AccountController;

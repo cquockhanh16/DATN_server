@@ -6,7 +6,7 @@ router.get("/account/list", AccountController.getListAccount);
 
 router.post("/account/lock", AccountController.lockAccount);
 
-// router.get("/user/list", UserController.getListUser);
+router.get("/account/detail", AccountController.getDetailAccount);
 
 // router.get("/user", UserController.findUserByField);
 

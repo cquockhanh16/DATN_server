@@ -105,13 +105,11 @@ class UserService {
           phone_number ? (user.phone_number = phone_number) : "";
           address ? (user.address = address) : "";
           identity_card ? (user.identity_card = identity_card) : "";
-          console.log(file);
           if (file && file.path) {
             const publib_id = `${process.env.CLOUD_FOLDER_NAME}/${
               user.identity_card_image.split("/").pop().split(".")[0]
             }`;
             cloudinary.uploader.destroy(publib_id).then((reslt) => {
-              console.log(publib_id);
               user.identity_card_image = file.path;
               return user.save();
             });
