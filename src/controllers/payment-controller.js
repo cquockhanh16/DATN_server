@@ -1,6 +1,7 @@
 const moment = require("moment");
 
 const PawnProductService = require("../services/pawn-product-service");
+const Transaction = require("../models/transaction-model");
 const crypto = require("crypto");
 const axios = require("axios");
 
