@@ -136,7 +136,7 @@ class OrderService {
         .populate({
           path: "products.product_id",
           select:
-            "product_name estimated_value product_quantity pawn_date term",
+            "product_name estimated_value interest_rate product_quantity pawn_date term",
         })
         .populate({
           path: "customer_id",

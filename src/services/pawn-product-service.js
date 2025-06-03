@@ -5,6 +5,7 @@ const UserService = require("./user-service");
 const { cloudinary } = require("../configs/upload-config");
 const { DATA_PAGE, LIMIT_DATA_PAGE } = require("../configs/const-config");
 const { getMonthsBetweenDates } = require("../utils/time-function");
+const { createTransaction } = require("./transaction-service");
 
 require("dotenv").config();
 
@@ -46,10 +47,12 @@ class PawnProductService {
         : "";
       product_quantity ? (newProduct.product_quantity = product_quantity) : "";
       product_status ? (newProduct.product_status = product_status) : "";
+      let userr = null;
       UserService.findUserByField({ field: user_id })
         .then((user) => {
           if (user) {
             newProduct.user_id = user?._id;
+            userr = user;
           }
           category_id ? (newProduct.category_id = category_id) : "";
           newProduct.pawn_date = pawn_date;
@@ -60,11 +63,25 @@ class PawnProductService {
           if (file && file.path) {
             newProduct.product_image = file.path;
           }
+
           return newProduct.save();
         })
-        .then((data) => res(data))
+        .then(async (data) => {
+          console.log(userr);
+          await createTransaction({
+            customerId: userr != null ? userr?.identity_card : null,
+            productId: data?._id,
+            amount: estimated_value * product_quantity,
+            orderId: `PAWN${new Date().getTime()}_${data?._id}_${
+              userr?.identity_card
+            }`,
+            status: "success",
+            transactionType: "pawn",
+          });
+          res(data);
+        })
         .catch((err) => {
-          cloudinary.uploader.destroy(file.filename).then(() => rej(err));
+          rej(err);
         });
     });
   };
@@ -226,10 +243,10 @@ class PawnProductService {
         product_quantity,
         interest_rate,
       } = body;
-      console.log(file);
       pawnProuct
         .findById(id)
-        .then((data) => {
+        .populate("user_id")
+        .then(async (data) => {
           if (!data) {
             rej("Pawn product not found");
           }
@@ -248,9 +265,7 @@ class PawnProductService {
           estimated_value && !isNaN(estimated_value)
             ? (data.estimated_value = estimated_value)
             : "";
-          sale_price && !isNaN(sale_price)
-            ? (data.sale_price = sale_price)
-            : "";
+
           product_quantity && !isNaN(product_quantity)
             ? (data.product_quantity = product_quantity)
             : "";
@@ -264,6 +279,33 @@ class PawnProductService {
           category_id && category_id.trim() !== ""
             ? (data.category_id = category_id)
             : "";
+          if (+sale_price > 0 && !isNaN(sale_price)) {
+            data.sale_price = sale_price;
+            data.product_status = "liquidated";
+            await createTransaction({
+              productId: id,
+              amount: sale_price * data.product_quantity,
+              customerId: data.user_id.identity_card,
+              orderId: `LIQUIDATED${new Date().getTime()}_${id}_${
+                data.user_id.identity_card
+              }`,
+              status: "success",
+              transactionType: "liquidation",
+            });
+          }
+          if (product_status === "redeemed") {
+            data.product_status = "redeemed";
+            await createTransaction({
+              productId: id,
+              amount: data.estimated_value * data.product_quantity,
+              customerId: data.user_id.identity_card,
+              orderId: `REDEEMED${new Date().getTime()}_${id}_${
+                data.user_id.identity_card
+              }`,
+              status: "success",
+              transactionType: "redeem",
+            });
+          }
           if (holding_months && holding_months.length > 0) {
             const months =
               holding_months.length > 1
@@ -276,6 +318,20 @@ class PawnProductService {
                 return new Date().getTime();
               }
               return item;
+            });
+            await createTransaction({
+              productId: id,
+              amount:
+                data.estimated_value *
+                (data.interest_rate / 100) *
+                holding_months.length *
+                data.product_quantity,
+              customerId: data.user_id.identity_card,
+              orderId: `INTEREST${new Date().getTime()}_${id}_${
+                data.user_id.identity_card
+              }`,
+              status: "success",
+              transactionType: "interest_payment",
             });
           }
           if (file && file.path) {

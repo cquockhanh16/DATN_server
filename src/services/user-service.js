@@ -3,6 +3,7 @@ const User = require("../models/user-model");
 const { cloudinary } = require("../configs/upload-config");
 const { DATA_PAGE, LIMIT_DATA_PAGE } = require("../configs/const-config");
 const AccountService = require("./account-service");
+const { deleteFileImageCloudinary } = require("../utils/delete-image");
 require("dotenv").config();
 class UserService {
   static createUser = (body, file) => {
@@ -97,7 +98,7 @@ class UserService {
         rej("Id param is valid");
       }
       User.findOne({ _id: id })
-        .then((user) => {
+        .then(async (user) => {
           if (!user) {
             rej("User not found");
           }
@@ -106,13 +107,9 @@ class UserService {
           address ? (user.address = address) : "";
           identity_card ? (user.identity_card = identity_card) : "";
           if (file && file.path) {
-            const publib_id = `${process.env.CLOUD_FOLDER_NAME}/${
-              user.identity_card_image.split("/").pop().split(".")[0]
-            }`;
-            cloudinary.uploader.destroy(publib_id).then((reslt) => {
-              user.identity_card_image = file.path;
-              return user.save();
-            });
+            await deleteFileImageCloudinary(user.identity_card_image);
+            user.identity_card_image = file.path;
+            return user.save();
           } else {
             return user.save();
           }

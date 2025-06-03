@@ -163,6 +163,7 @@ class PaymentController {
         tran.payType = payType;
         tran.orderId = orderId;
         tran.status = "success";
+        tran.transactionType = "interest_payment";
         await tran.save().then((result) => {
           PawnProductService.updatePawnProduct(
             { holding_months: [""] },

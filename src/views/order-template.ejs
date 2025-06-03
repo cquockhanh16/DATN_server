@@ -163,6 +163,7 @@
             <!-- <th>Hình ảnh</th> -->
             <th>Tên sản phẩm</th>
             <th>Số lượng</th>
+            <th>Lãi suất(/1 tháng)</th>
             <th>Giá cầm</th>
             <th>Ngày cầm</th>
             <th>Hạn chuộc</th>
@@ -175,6 +176,7 @@
             <td><%= i + 1 %></td>
             <td><%= products[i].product_id.product_name %></td>
             <td><%= products[i].product_id.product_quantity %></td>
+            <td><%= products[i].product_id.interest_rate + "%" %></td>
             <td>
               <%=
               (products[i].product_id.estimated_value).toLocaleString('vi-VN')
@@ -198,26 +200,8 @@
           <% total += products[i].product_id.estimated_value *
           products[i].product_id.product_quantity; %> <% } %>
         </tbody>
-        <!-- <tfoot>
-          <tr>
-            <td colspan="4">Giảm giá</td>
-            <td>10</td>
-          </tr>
-          <tr>
-            <td colspan="4">Cộng</td>
-            <td><%= total.toLocaleString('vi-VN') %></td>
-          </tr>
-        </tfoot> -->
       </table>
       <div class="agreement">
-        <p>Lãi suất: <strong> <%= interest_rate %>% / tháng </strong></p>
-        <p>
-          Lệ phí thỏa thuận:
-          <strong>
-            <%= (total * interest_rate / 100).toLocaleString('vi-VN') %> đ /
-            tháng
-          </strong>
-        </p>
         <p>Tôi đã nhận đủ số tiền mà cửa hàng đã giao</p>
         <p>Số tiền biết bằng chữ:</p>
         <p>
