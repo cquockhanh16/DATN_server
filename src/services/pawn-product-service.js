@@ -183,31 +183,34 @@ class PawnProductService {
       const { page, limit } = query;
       const pageOrder = page || DATA_PAGE;
       const limitOrder = limit || LIMIT_DATA_PAGE;
-      pawnProuct.countDocuments().then((count) => {
-        if (count === 0) {
-          res({
-            total_page: 1,
-            current_page: 1,
-            data: [],
-          });
-        }
-        pawnProuct
-          .find()
-          .sort({ created_at: -1 })
-          .skip((pageOrder - 1) * limitOrder)
-          .limit(limitOrder)
-          .populate("user_id")
-          .then((data) =>
+      pawnProuct
+        .countDocuments()
+        .then((count) => {
+          if (count === 0) {
             res({
-              total_page: Math.ceil(count / limitOrder),
-              current_page: +pageOrder,
-              data,
-              data_length: count,
-              limit: limitOrder,
-            })
-          )
-          .catch((err) => rej(err));
-      });
+              total_page: 1,
+              current_page: 1,
+              data: [],
+            });
+          }
+          pawnProuct
+            .find()
+            .sort({ created_at: -1 })
+            .skip((pageOrder - 1) * limitOrder)
+            .limit(limitOrder)
+            .populate("user_id")
+            .then((data) =>
+              res({
+                total_page: Math.ceil(count / limitOrder),
+                current_page: +pageOrder,
+                data,
+                data_length: count,
+                limit: limitOrder,
+              })
+            )
+            .catch((err) => rej(err));
+        })
+        .catch((err) => rej(err));
     });
   };
 
@@ -352,6 +355,28 @@ class PawnProductService {
         .then((result) => res(result))
         .catch((err) => rej(err));
     });
+  };
+
+  static checkExpiredProducts = async () => {
+    try {
+      const today = new Date().getTime();
+      const expiredProducts = await pawnProuct.find({
+        term: { $lt: today }, // Sản phẩm có expiryDate nhỏ hơn ngày hiện tại
+        product_status: { $in: "active" }, // Chỉ lấy sản phẩm chưa được đánh dấu là "expired"
+      });
+
+      if (expiredProducts.length > 0) {
+        await pawnProuct.updateMany(
+          { _id: { $in: expiredProducts.map((p) => p._id) } },
+          { $set: { product_status: "expired" } }
+        );
+        console.log(`Đã cập nhật ${expiredProducts.length} sản phẩm quá hạn.`);
+      } else {
+        console.log("Không có sản phẩm quá hạn.");
+      }
+    } catch (error) {
+      console.error("Lỗi khi kiểm tra sản phẩm quá hạn:", error);
+    }
   };
 }
 

@@ -147,28 +147,30 @@ class AccountService {
     return new Promise((res, rej) => {
       const pageOrder = page || DATA_PAGE;
       const limitOrder = limit || LIMIT_DATA_PAGE;
-      Account.countDocuments().then((count) => {
-        if (count === 0) {
-          return res({
-            total_page: 1,
-            current_page: 1,
-            data: [],
-          });
-        }
-        Account.find()
-          .skip((pageOrder - 1) * limitOrder)
-          .limit(limitOrder)
-          .then((data) => {
-            res({
-              total_page: Math.ceil(count / limitOrder),
-              current_page: +pageOrder,
-              data,
-              data_length: count,
-              limit: limitOrder,
+      Account.countDocuments()
+        .then((count) => {
+          if (count === 0) {
+            return res({
+              total_page: 1,
+              current_page: 1,
+              data: [],
             });
-          })
-          .catch((err) => rej(err));
-      });
+          }
+          Account.find()
+            .skip((pageOrder - 1) * limitOrder)
+            .limit(limitOrder)
+            .then((data) => {
+              res({
+                total_page: Math.ceil(count / limitOrder),
+                current_page: +pageOrder,
+                data,
+                data_length: count,
+                limit: limitOrder,
+              });
+            })
+            .catch((err) => rej(err));
+        })
+        .catch((err) => rej(err));
     });
   };
 

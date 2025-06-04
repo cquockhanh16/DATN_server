@@ -47,51 +47,53 @@ class OrderService {
       // let user = {};
       User.findOne(option)
         .then((user) => {
-          Order.countDocuments().then((count) => {
-            if (count === 0) {
-              res({
-                total_page: 1,
-                current_page: 1,
-                data: [],
-              });
-            }
-            Order.find({ customer_id: user?._id })
-              .skip((pageOrder - 1) * limitOrder)
-              .limit(limitOrder)
-              .sort({ created_at: -1 })
-              .populate(
-                "products.product_id",
-                "product_quantity estimated_value"
-              )
-              .then((data) => {
-                const resData = { orders: data, customer: user };
+          Order.countDocuments()
+            .then((count) => {
+              if (count === 0) {
                 res({
-                  total_page: Math.ceil(count / limitOrder),
-                  current_page: +pageOrder,
-                  data: resData,
-                  data_length: count,
-                  limit: limitOrder,
+                  total_page: 1,
+                  current_page: 1,
+                  data: [],
                 });
-              })
-              .catch((err) => rej(err));
-            // User.findOne(option).then((user) => {
-            //   if (!user) {
-            //     rej("Customer is not found");
-            //   }
-            //   Order.find({ customer_id: user._id })
-            //     .populate({
-            //       path: "products.product_id",
-            //       select: "product_name estimated_value",
-            //     })
-            //     .select("-customer_id")
-            //     .then((data) => {
-            //       if (!data) {
-            //         rej("Order is not found");
-            //       }
-            //       res({ orders: data, customer: user });
-            //     })
-            //     .catch((err) => rej(err));
-          });
+              }
+              Order.find({ customer_id: user?._id })
+                .skip((pageOrder - 1) * limitOrder)
+                .limit(limitOrder)
+                .sort({ created_at: -1 })
+                .populate(
+                  "products.product_id",
+                  "product_quantity estimated_value"
+                )
+                .then((data) => {
+                  const resData = { orders: data, customer: user };
+                  res({
+                    total_page: Math.ceil(count / limitOrder),
+                    current_page: +pageOrder,
+                    data: resData,
+                    data_length: count,
+                    limit: limitOrder,
+                  });
+                })
+                .catch((err) => rej(err));
+              // User.findOne(option).then((user) => {
+              //   if (!user) {
+              //     rej("Customer is not found");
+              //   }
+              //   Order.find({ customer_id: user._id })
+              //     .populate({
+              //       path: "products.product_id",
+              //       select: "product_name estimated_value",
+              //     })
+              //     .select("-customer_id")
+              //     .then((data) => {
+              //       if (!data) {
+              //         rej("Order is not found");
+              //       }
+              //       res({ orders: data, customer: user });
+              //     })
+              //     .catch((err) => rej(err));
+            })
+            .catch((err) => rej(err));
         })
         .catch((err) => rej(err));
     });

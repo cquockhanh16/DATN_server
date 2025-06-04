@@ -46,33 +46,35 @@ class TransactionService {
       let option = {};
       const pageOrder = +page || DATA_PAGE;
       const limitOrder = +limit || LIMIT_DATA_PAGE;
-      Transaction.countDocuments(option).then((count) => {
-        if (count === 0) {
-          res({
-            total_page: 1,
-            current_page: 1,
-            data: [],
-            limit: +limitOrder,
-            data_length: count,
-          });
-        }
-        Transaction.find({ ...option })
-          .skip((+pageOrder - 1) * +limitOrder)
-          .limit(+limitOrder)
-          .then((data) => {
-            if (!data) {
-              rej("Transaction is not found");
-            }
+      Transaction.countDocuments()
+        .then((count) => {
+          if (count === 0) {
             res({
-              total_page: Math.ceil(data.length / limitOrder),
-              current_page: +pageOrder,
-              data: data,
-              data_length: count,
+              total_page: 1,
+              current_page: 1,
+              data: [],
               limit: +limitOrder,
+              data_length: count,
             });
-          })
-          .catch((err) => rej(err));
-      });
+          }
+          Transaction.find({ ...option })
+            .skip((+pageOrder - 1) * +limitOrder)
+            .limit(+limitOrder)
+            .then((data) => {
+              if (!data) {
+                rej("Transaction is not found");
+              }
+              res({
+                total_page: Math.ceil(data.length / limitOrder),
+                current_page: +pageOrder,
+                data: data,
+                data_length: count,
+                limit: +limitOrder,
+              });
+            })
+            .catch((err) => rej(err));
+        })
+        .catch((err) => rej(err));
     });
   };
 

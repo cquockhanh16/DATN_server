@@ -16,6 +16,8 @@ const limiter = expressRateLimit({
   },
 });
 
+const { deleteFileImageCloudinary } = require("./utils/delete-image");
+
 const connectDB = require("./configs/db-config");
 
 // require router
@@ -27,8 +29,7 @@ const authRouter = require("./routers/auth-router");
 const accountRouter = require("./routers/account-router");
 const paymentRouter = require("./routers/payment-router");
 const transactionRouter = require("./routers/transaction-router");
-
-const { deleteFileImageCloudinary } = require("./utils/delete-image");
+const setupCronJobs = require("./configs/cron-config");
 
 app.set("view engine", "ejs"); // Đặt view engine là EJS
 app.set("views", path.join(__dirname, "views")); // Thư mục chứa các file EJS
@@ -57,7 +58,6 @@ app.use("/api", paymentRouter);
 app.use("/api", transactionRouter);
 
 // connect database
-connectDB();
 
 // handle api not declared
 app.use((req, res) => {
@@ -79,5 +79,16 @@ app.use(async (error, req, res, next) => {
   });
 });
 
-// Export app để sử dụng trong file server.js
+async function startServer() {
+  try {
+    await connectDB();
+    setupCronJobs();
+  } catch (error) {
+    console.error("Failed to start application:", error);
+    process.exit(1);
+  }
+}
+
+startServer();
+
 module.exports = app;

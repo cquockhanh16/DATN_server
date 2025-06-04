@@ -68,35 +68,37 @@ class UserService {
     return new Promise((res, rej) => {
       const pageOrder = page || DATA_PAGE;
       const limitOrder = limit || LIMIT_DATA_PAGE;
-      User.countDocuments().then((count) => {
-        if (count === 0) {
-          return res({
-            total_page: 1,
-            current_page: 1,
-            data: [],
-          });
-        }
-        User.find()
-          .skip((pageOrder - 1) * limitOrder)
-          .limit(limitOrder)
-          .then((data) => {
-            if (data.length === 0) {
-              res({
-                total_page: 1,
-                current_page: 1,
-                data: [],
-              });
-            }
-            res({
-              total_page: Math.ceil(count / limitOrder),
-              current_page: +pageOrder,
-              data,
-              data_length: count,
-              limit: limitOrder,
+      User.countDocuments()
+        .then((count) => {
+          if (count === 0) {
+            return res({
+              total_page: 1,
+              current_page: 1,
+              data: [],
             });
-          })
-          .catch((err) => rej(err));
-      });
+          }
+          User.find()
+            .skip((pageOrder - 1) * limitOrder)
+            .limit(limitOrder)
+            .then((data) => {
+              if (data.length === 0) {
+                res({
+                  total_page: 1,
+                  current_page: 1,
+                  data: [],
+                });
+              }
+              res({
+                total_page: Math.ceil(count / limitOrder),
+                current_page: +pageOrder,
+                data,
+                data_length: count,
+                limit: limitOrder,
+              });
+            })
+            .catch((err) => rej(err));
+        })
+        .catch((err) => rej(err));
     });
   };
 
