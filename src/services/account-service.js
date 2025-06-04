@@ -68,7 +68,10 @@ class AccountService {
       ])
         .then((data) => {
           if (!data[0] || !data[1]) {
-            rej("Account of user not found");
+            return rej("Account of user not found");
+          }
+          if (data[0] && data[0].status === "lock") {
+            return rej("Account of user was locked");
           }
           let acc = data[0];
           bcrypt
@@ -144,26 +147,28 @@ class AccountService {
     return new Promise((res, rej) => {
       const pageOrder = page || DATA_PAGE;
       const limitOrder = limit || LIMIT_DATA_PAGE;
-      Account.find()
-        .skip((pageOrder - 1) * limitOrder)
-        .limit(limitOrder)
-        .then((data) => {
-          if (data.length === 0) {
-            res({
-              total_page: 1,
-              current_page: 1,
-              data: [],
-            });
-          }
-          res({
-            total_page: Math.ceil(data.length / limitOrder),
-            current_page: +pageOrder,
-            data,
-            data_length: data.length,
-            limit: limitOrder,
+      Account.countDocuments().then((count) => {
+        if (count === 0) {
+          return res({
+            total_page: 1,
+            current_page: 1,
+            data: [],
           });
-        })
-        .catch((err) => rej(err));
+        }
+        Account.find()
+          .skip((pageOrder - 1) * limitOrder)
+          .limit(limitOrder)
+          .then((data) => {
+            res({
+              total_page: Math.ceil(count / limitOrder),
+              current_page: +pageOrder,
+              data,
+              data_length: count,
+              limit: limitOrder,
+            });
+          })
+          .catch((err) => rej(err));
+      });
     });
   };
 

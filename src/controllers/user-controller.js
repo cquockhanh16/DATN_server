@@ -34,7 +34,7 @@ class UserController {
 
   static getListUser = async (req, res, next) => {
     try {
-      const { page, limit } = req.params;
+      const { page, limit } = req.query;
       const listUser = await UserService.getListUser(page, limit);
       res.status(200).json({
         sts: true,

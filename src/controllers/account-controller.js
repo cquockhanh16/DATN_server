@@ -18,7 +18,7 @@ class AccountController {
 
   static getListAccount = async (req, res, next) => {
     try {
-      const { page, limit } = req.params;
+      const { page, limit } = req.query;
       const listAccount = await AccountService.getListAccount(page, limit);
       res.status(200).json({
         sts: true,

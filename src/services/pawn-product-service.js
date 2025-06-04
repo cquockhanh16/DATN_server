@@ -227,7 +227,7 @@ class PawnProductService {
     });
   };
 
-  static updatePawnProduct = (body, file = null, id) => {
+  static updatePawnProduct = (body, file = null, id, isPayment = false) => {
     return new Promise((res, rej) => {
       const {
         product_name,
@@ -319,20 +319,22 @@ class PawnProductService {
               }
               return item;
             });
-            await createTransaction({
-              productId: id,
-              amount:
-                data.estimated_value *
-                (data.interest_rate / 100) *
-                holding_months.length *
-                data.product_quantity,
-              customerId: data.user_id.identity_card,
-              orderId: `INTEREST${new Date().getTime()}_${id}_${
-                data.user_id.identity_card
-              }`,
-              status: "success",
-              transactionType: "interest_payment",
-            });
+            if (!isPayment) {
+              await createTransaction({
+                productId: id,
+                amount:
+                  data.estimated_value *
+                  (data.interest_rate / 100) *
+                  holding_months.length *
+                  data.product_quantity,
+                customerId: data.user_id.identity_card,
+                orderId: `INTEREST${new Date().getTime()}_${id}_${
+                  data.user_id.identity_card
+                }`,
+                status: "success",
+                transactionType: "interest_payment",
+              });
+            }
           }
           if (file && file.path) {
             const publib_id = `${process.env.CLOUD_FOLDER_NAME}/${

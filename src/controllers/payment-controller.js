@@ -168,7 +168,8 @@ class PaymentController {
           PawnProductService.updatePawnProduct(
             { holding_months: [""] },
             null,
-            tran.productId
+            tran.productId,
+            true
           );
         });
         // 3. Trả response cho Momo (bắt bộc)
