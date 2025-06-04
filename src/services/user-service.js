@@ -10,31 +10,38 @@ class UserService {
     return new Promise((res, rej) => {
       const { name, phone_number, address, identity_card } = body;
       if (!name || !phone_number || !address || !identity_card) {
-        rej("Fields can't empty!!");
+        return rej("Fields can't empty!!");
       }
-      const newUser = new User();
-      newUser.name = name;
-      newUser.phone_number = phone_number;
-      newUser.address = address;
-      newUser.identity_card = identity_card;
-      newUser.created_at = new Date().getTime();
-      if (file && file.path) {
-        newUser.identity_card_image = file.path;
-      }
-      newUser
-        .save()
-        .then((savedUser) => {
-          return AccountService.register({
-            username: identity_card,
-            password: phone_number,
+      User.findOne({
+        $or: [{ identity_card: identity_card }, { phone_number: phone_number }],
+      }).then((data) => {
+        if (data) {
+          return rej("User already exist");
+        }
+        const newUser = new User();
+        newUser.name = name;
+        newUser.phone_number = phone_number;
+        newUser.address = address;
+        newUser.identity_card = identity_card;
+        newUser.created_at = new Date().getTime();
+        if (file && file.path) {
+          newUser.identity_card_image = file.path;
+        }
+        newUser
+          .save()
+          .then((savedUser) => {
+            return AccountService.register({
+              username: identity_card,
+              password: phone_number,
+            });
+          })
+          .then((data) => {
+            res(data);
+          })
+          .catch((err) => {
+            rej(err);
           });
-        })
-        .then((data) => {
-          res(data);
-        })
-        .catch((err) => {
-          rej(err);
-        });
+      });
     });
   };
 

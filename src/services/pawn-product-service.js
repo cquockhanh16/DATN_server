@@ -148,8 +148,9 @@ class PawnProductService {
   static getListPawnProduct = (query) => {
     return new Promise((res, rej) => {
       const { page, limit } = query;
-      const pageOrder = page || DATA_PAGE;
-      const limitOrder = limit || LIMIT_DATA_PAGE;
+      console.log(query);
+      const pageOrder = !isNaN(page) ? +page : DATA_PAGE;
+      const limitOrder = !isNaN(limit) ? +limit : LIMIT_DATA_PAGE;
       pawnProuct.countDocuments().then((count) => {
         if (count === 0) {
           res({
