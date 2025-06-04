@@ -47,7 +47,7 @@ app.use(
       "http://localhost:5173", // Địa chỉ FE local
       "https://datn-server-c9cu.onrender.com", // Địa chỉ BE trên Render
     ],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
