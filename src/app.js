@@ -9,7 +9,11 @@ const expressRateLimit = require("express-rate-limit");
 const app = express();
 const limiter = expressRateLimit({
   windowMs: 15 * 60 * 1000, // 15 phút
-  max: 100, // Giới hạn 100 request trong 15 phút
+  max: 100, // Giới hạn mỗi IP 100 request trong 15 phút
+  message: "Quá nhiều request từ IP này, vui lòng thử lại sau 15 phút",
+  validate: {
+    trustProxy: false, // Tắt validate trust proxy nếu bạn đã cấu hình ở app level
+  },
 });
 
 const connectDB = require("./configs/db-config");
@@ -28,7 +32,10 @@ const { deleteFileImageCloudinary } = require("./utils/delete-image");
 
 app.set("view engine", "ejs"); // Đặt view engine là EJS
 app.set("views", path.join(__dirname, "views")); // Thư mục chứa các file EJS
-
+// Dành cho Render.com hoặc các dịch vụ cloud
+app.set("trust proxy", ["loopback", "linklocal", "uniquelocal"]);
+// Hoặc đơn giản hơn (nhưng kém an toàn hơn)
+app.set("trust proxy", true);
 // Middleware
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json({ limit: "5mb" }));
